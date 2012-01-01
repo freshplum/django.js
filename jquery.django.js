@@ -184,6 +184,7 @@
             s = s.substr(1, s.length - 2);
             s = s.replace(/\\/g, '');
             s = s.replace(/\?/g, '');
+            s = s.replace(/\$/g, '');
             var matches = s.match(/\(.*\)\??/) || [];
             for (var i=0; i<matches.length; i++){
                 var param = '';
