@@ -3,13 +3,15 @@
   <head>
     <meta http-equiv="content-type" content="text/html;charset=utf-8">
     <title>django.js</title>
-		<link href="http://alexgorbatchev.com/pub/sh/current/styles/shThemeDefault.css" rel="stylesheet" type="text/css" />
+		
 		<link href="http://alexgorbatchev.com/pub/sh/current/styles/shCore.css" rel="stylesheet" type="text/css" />
+		<link href="http://alexgorbatchev.com/pub/sh/current/styles/shCoreDefault.css" rel="stylesheet" type="text/css" />
 		<script src="http://alexgorbatchev.com/pub/sh/current/scripts/shCore.js" type="text/javascript"></script>
 		<script src="http://alexgorbatchev.com/pub/sh/current/scripts/shAutoloader.js" type="text/javascript"></script>
 		<script src="http://alexgorbatchev.com/pub/sh/current/scripts/shBrushJScript.js" type="text/javascript"></script>
+		<script src="http://alexgorbatchev.com/pub/sh/current/scripts/shBrushPython.js" type="text/javascript"></script>
 		<script src="http://alexgorbatchev.com/pub/sh/current/scripts/shBrushXml.js" type="text/javascript"></script>
-		
+		<script src="http://alexgorbatchev.com/pub/sh/current/scripts/shBrushPython.js" type="text/javascript"></script>
 
     <style>
 			body{
@@ -25,8 +27,28 @@
 			<li><a href="#intro">Introduction</a></li>
 			<li><a href="#motivation">Motivation</a></li>
 			<li><a href="#">Getting Started</a></li>
-			<li><a href="#">Views</a></li>
-			<li><a href="#">Subviews and Synchronicity</a></li>
+			<li><a href="#">Views</a>
+				<ul>
+					<li><a href="#load">load</a></li>
+					<li><a href="#unload">unload</a></li>
+					<li><a href="#required">Required views</a></li>
+					<li><a href="#synchronicity">Synchronicity with required views</a></li>
+				</ul>
+			</li>
+			<li><a href="#options">Options</a>
+				<ul>
+					<li><a href="#urls">urls</a></li>
+					<li><a href="#no_match">no_match</a></li>
+				</ul>
+			</li>
+			<li><a href="#">Methods</a>
+				<ul>
+					<li><a href="#urls">url</a></li>
+					<li><a href="#urls">pushstate</a></li>
+					<li><a href="#no_match">anchors</a></li>
+					<li><a href="#no_match">toggle</a></li>
+				</ul>
+			</li>
 		</ul>
 		<div>
 			<a name="intro"><a>
@@ -40,8 +62,64 @@
 				clicks on a link, instead of reloading a new webpage, a call is made to the browser's
 				<a href="https://developer.mozilla.org/en/DOM/Manipulating_the_browser_history#The_pushState().C2.A0method">pushState method</a>
 				to update the page's URL (without a page reload) followed by a call to a method
-				(that you define) to render the 
+				(that you define) to provide the appropriate view logic to update the page.
 			</p>
+			<p>
+				If you're familiar with Django, the python web framework, you'll notice a similarity in
+				Django.js's separation of logic.
+			</p>
+			<p>Python Django</p>
+			<pre class="brush: python">
+				# urls patterns
+				urls = patterns('',
+				    url(r'^$', index_view, name="index"),
+						url(r'^post/(?P&lt;id>\d{4})/$', post_view, name="post"))
+				...
+				
+				# views
+				def index(request):
+					... some logic
+				
+				def post(request, id):
+					... some other logic
+			</pre>
+			Django.js
+			<pre class="brush: js">
+				&lt;script>
+				// url patterns
+				$(window).django({
+					urls: [
+						{url: /\//, view: index_view, name: 'index'},
+						{url: /\/post\/(.[^\/]*)\/?/, view: post_view, name: 'post'}
+					]
+				});
+				...
+				
+				// views
+				function index_view(){
+					this.load = function(url){
+						// some logic
+					}
+				}
+				
+				function post_view(){
+					this.load = function(url, id){
+						// some other logic
+					}
+				}
+				&lt;/script>
+			</pre>
+			</div>
+			<div>
+				<a name="motivation"><a>
+				<h2>Motivation</h2>
+				<p>At freshplum, we wanted to build our web console on top of our API in the exact same
+					way that any third party developer could create a app powered by our API. That is, we wanted the code
+					to live entirely client be side and access our restful API the same way that a developer could. However,
+					at the same time, we still wanted it to "feel" like a website. We wanted nicely formed urls 
+					that updated 
+				</p>
+			</div>
 			<p>
 				Here is a basic example to give you an idea:<br>
 				<pre class="brush: js">
@@ -94,14 +172,7 @@
 				</pre>
 			</p>
 		</div>
-		<div>
-			<a name="motivation"><a>
-			<h2>Motivation</h2>
-			<p>At freshplum, we wanted to build our web console on top of our API in the exact same
-				way that any third party developer could create a app powered by our API. That is, we wanted the code
-				to live entirely client be side and access our restful API the same way that a developer
-			</p>
-		</div>
+
 		<div>
 			<a name="start"><a>
 			<h2>Getting Started</h2>
