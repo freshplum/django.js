@@ -1,4 +1,5 @@
 (function($) {
+jQuery.django = function(method){
     var methods = {
         init : function(options) { 
             var settings = $.extend({
@@ -9,14 +10,14 @@
                 'active_views': []
             }, options);
             $(window).data('django', settings);
-            $(window).bind('popstate', function(){ $(window).django('statechange') });
-            $(window).django('anchors');
+            $(window).bind('popstate', function(){ $.django('statechange') });
+            $.django('anchors');
             
             /* TODO -- some browsers fire the popstate event immediately upon page load,
             meaning that inital view will be loaded twice since there are 2 calls to
-            $(window).django('statechange')
+            $.django('statechange')
             */ 
-            $(window).django('statechange');
+            //$.django('statechange');
             return this;
         },
         pushstate : function(obj, title, url){
@@ -25,7 +26,7 @@
             pushState yet
             */
             window.history.pushState(obj, title, url);
-            $(window).django('statechange');
+            $.django('statechange');
             return this;
         },
         statechange : function() {
@@ -34,24 +35,24 @@
             */
             if (!$(window).data('django').urls) return $.error('No URLS defined!');
 
-            var url = $(window).django('url');
+            var url = $.django('url');
             for (var i in $(window).data('django').urls){
                 var match = url.match($(window).data('django').urls[i].url);
                 if (match) {
                     if ($(window).data('django').urls[i].redirect){
-                        return $(window).django('pushstate', {}, '',
-                            $(window).django('url', $(window).data('django').urls[i].redirect));
+                        return $.django('pushstate', {}, '',
+                            $.django('url', $(window).data('django').urls[i].redirect));
                     }
                     else{
                         var view = $(window).data('django').urls[i].view;
-                        var requirements = $(window).django('requirements', view);
+                        var requirements = $.django('requirements', view);
                         var active = $.extend(true, [], $(window).data('django').active_views);
                         for (var i=0; i<active.length; i++){
                             if (requirements.indexOf(active[i]) == -1){
-                                $(window).django('unload', active[i]);
+                                $.django('unload', active[i]);
                             }
                         }
-                        return $(window).django('load', view, match);
+                        return $.django('load', view, match);
                     }
                 }
             }
@@ -69,7 +70,7 @@
             $('a').off('click.django');
             $('a').on('click.django', function(){
                 if ($(this).attr('href') && $(this).attr('href') != '#'){
-                    try{ $(window).django('pushstate', {}, '', $(this).attr('href')); }
+                    try{ $.django('pushstate', {}, '', $(this).attr('href')); }
                     catch (e){ $.error(e) }
                 }
                 return false;
@@ -132,14 +133,14 @@
             var instance = new view();
             var deferred = $.Deferred();
 
-            $.when($(window).django('load', instance.requires, match)).done(
+            $.when($.django('load', instance.requires, match)).done(
                 function(view, match){
                     return function(){
                         var d = view.load.apply(view, match);
                         $.when(d).then(function(){
                             deferred.resolve();
                             if (view.title) document.title = view.title;
-                            return $(window).django('anchors');
+                            return $.django('anchors');
                         });
                     }
                 }(instance, match));
@@ -167,7 +168,7 @@
             */
             var i = new view();
             if (!i.requires) return [view]
-            else return [view].concat($(window).django('requirements', i.requires));
+            else return [view].concat($.django('requirements', i.requires));
         },
         url : function(name, params){
             /*
@@ -176,7 +177,7 @@
             if (!name) return window.location.pathname;
             for (var i in $(window).data('django').urls){
                 if ($(window).data('django').urls[i].name == name){
-                    return $(window).django('reverse', $(window).data('django').urls[i].url, params);
+                    return $.django('reverse', $(window).data('django').urls[i].url, params);
                 }
             }
         },
@@ -223,18 +224,15 @@
         }
     };
     
-    $.fn.django = function(method){
-        
-        // Method calling logic
-        if (methods[method]){
-            return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
-        } 
-        else if (typeof method === 'object' || ! method){
-            return methods.init.apply( this, arguments );
-        } 
-        else {
-            $.error( 'Method ' + method + ' does not exist on jQuery.django' );
-        }
-    };
+    // Method calling logic
+    if (methods[method]){
+        return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
+    } 
+    else if (typeof method === 'object' || ! method){
+        return methods.init.apply( this, arguments );
+    } 
+    else {
+        $.error( 'Method ' + method + ' does not exist on jQuery.django' );
+    }
+}
 })(jQuery);
-
