@@ -1,0 +1,135 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" dir="ltr" class="client-nojs" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>django.js demo</title>
+	<!-- Required -->
+	<script type="text/javascript" src="jquery.js"></script>
+	<script type="text/javascript" src="jquery.django.js"></script>
+	
+	<!-- Just for this demo -->
+	<script type="text/javascript" src="jquery.tmpl.js"></script>
+</head>
+<body>
+	<!-- Some CSS -->
+	<style>
+		.active{ font-weight: bold }
+	</style>
+
+	<!-- Setup the URLS when ready -->
+	<script>
+	var page;
+	$(document).ready(function(){
+		$(window).django({
+				urls: [
+					{url: /\/post\/(.[^\/]*)\/?/, view: post, name: 'post'},
+					{url: /\/about\/?$/, view: about, name: 'about'},
+					{url: /\/about\/contact\/?/, view: contact, name: 'contact'},
+					{url: /\/$/, view: home, name: 'home'}
+				],
+				no_match: function(url){
+					$('#content').html('Welcome to the demo!');
+				}
+			});
+	});
+	</script>
+	
+	<!-- Some helper JS -->
+	<script>
+	// just for convenience for development
+	function l(x){console.log(x)}
+	
+	// useful for the demo navigation
+	var nav_toggle = function(group, rel){
+		$(window).django('toggle', {
+			group: group,
+			select: function(){
+				return (this.attr('rel') == String(rel))
+			},
+			active: function(){
+				this.addClass('active')
+			},
+			inactive: function(){
+				this.removeClass('active')
+			}
+		})
+	};
+	</script>
+	
+	<!-- Views -->
+	<script>
+	function home(){
+		this.load = function(){
+			this.title = 'Home';
+			$('#content').html($('#tmpl_home').tmpl());
+			nav_toggle($('#nav li'), 'home');
+		}
+	}
+	function post(){
+		this.load = function(url, id){
+			this.title = "Post "+ id;
+			
+			var div = $('#tmpl_post').tmpl({id:id});
+			for (var i=0;i<20;i++){
+				var li = $('<li/>');
+				li.attr('rel', i);
+				li.html('<a href="'+$(window).django('url', 'post', [i])+'">Post '+i+'</a>');
+				li.appendTo(div.find('ul'));
+			}
+			$('#content').html(div);
+			nav_toggle($('#nav li'), 'post');
+			nav_toggle($('#posts_nav li'), id);
+		}
+	};
+	function about(){
+		this.load = function(){
+			this.title = 'About Us';
+			$('#content').html($('#tmpl_about').tmpl({
+				url: $(window).django('url', 'contact')
+			}));
+			nav_toggle($('#nav li'), 'about');
+		}
+	};
+	function contact(){
+		this.requires = about;
+		this.load = function(){
+			$('#contact_form').html($('#tmpl_contact').tmpl());
+		}
+	}
+	</script>
+	
+	<!-- HTML -->
+	<ul id="nav">
+		<li rel="home"><a href="/">Home</a></li>
+		<li rel="post"><a href="/post/1/">Blog Posts</a></li>
+		<li rel="about"><a href="/about/">About Us</a></li>
+		<div id="content"><a href="/about/contact/">Contact Us!</a></div>
+	</ul>
+	
+	<!-- TEMPLATES -->
+	<script id="tmpl_home" type="text/x-jquery-tmpl">
+		<h1>Home</h1>
+		<p>Welcome to the home demo</p>
+	</script>
+	
+	<script id="tmpl_post" type="text/x-jquery-tmpl">
+		<div>
+		<h1>Post #${id}</h1>
+		<ul id="posts_nav"></ul>
+		</div>
+	</script>
+	
+	<script id="tmpl_about" type="text/x-jquery-tmpl">
+		<h1>About Us</h1>
+		<p>Hi. We should put up a pic or something</p>
+		<a href="${url}">Contact Us!</a>
+		<div id="contact_form"></div>
+	</script>
+	
+	<script id="tmpl_contact" type="text/x-jquery-tmpl">
+		<h3>Fill it out</h3>
+		<p>This is an example of a view that has a requirement</p>
+		<textarea>Just a normal text box</textarea>
+	</script>
+</body>
+</html>

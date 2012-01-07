@@ -11,6 +11,11 @@
             $(window).data('django', settings);
             $(window).bind('popstate', function(){ $(window).django('statechange') });
             $(window).django('anchors');
+            
+            /* TODO -- some browsers fire the popstate event immediately upon page load,
+            meaning that inital view will be loaded twice since there are 2 calls to
+            $(window).django('statechange')
+            */ 
             $(window).django('statechange');
             return this;
         },
@@ -50,7 +55,7 @@
                     }
                 }
             }
-            return $(window).data('django').urls[i].no_match(state.url);
+            return $(window).data('django').no_match(url);
         },
         anchors : function() { 
             /*
