@@ -1,5 +1,5 @@
-(function($) {
-jQuery.django = function(method){
+(function($) { 
+$.django = function(method){
     var methods = {
         init : function(options) { 
             var settings = $.extend({
@@ -221,6 +221,30 @@ jQuery.django = function(method){
                 if (x.select.call($(element))) x.active.call($(element));
                 else x.inactive.call($(element));
             })
+        },
+        model : function(options){
+            
+            this.attrs = {};
+            this.attr = function(name){
+                return new function(product, attr){
+                    this.get = function(){
+                        return product.attrs[attr];
+                        //if (!x) return this.attrs[name];
+                        //else this.attrs = 
+                    }
+
+                    this.set = function(x){
+                        product.attrs[attr] = x;
+                        return this;
+                    }
+
+                    return this;
+                }(this, name);
+                
+            }
+            this.span = function(attr){
+                
+            }
         }
     };
     
