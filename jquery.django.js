@@ -50,11 +50,13 @@ $.django = function(method){
                         
                         // unload neccesary instances
                         for (var i=0; i<active.length; i++){
+                            var remove = true;
                             for (var ii=0; ii<requirements.length; ii++){
-                                if (!(active[i] instanceof requirements[ii])){
-                                    $.django('unload', active[i]);
+                                if (active[i] instanceof requirements[ii]){
+                                    remove = false;
                                 }
                             }
+                            if (remove) $.django('unload', active[i]);
                         }
                         
                         // load neccesary views
