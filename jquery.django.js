@@ -227,24 +227,44 @@ $.django = function(method){
             this.attrs = {};
             this.attr = function(name){
                 return new function(product, attr){
-                    this.get = function(){
-                        return product.attrs[attr];
-                        //if (!x) return this.attrs[name];
-                        //else this.attrs = 
+                    this.save = function(){
+                        product.attrs[attr].old = product.attrs[attr].val;
                     }
-
-                    this.set = function(x){
-                        product.attrs[attr] = x;
-                        return this;
+                    this.revert = function(){
+                        product.attrs[attr].val = product.attrs[attr].old;
                     }
-
+                    this.val = function(value){
+                        if (value === undefined) return product.attrs[attr].val;
+                        if (!product.attrs[attr].val){
+                            product.attrs[attr].val = value;
+                            product.attrs[attr].old = value;
+                        }
+                        else{
+                            product.attrs[attr].val = value;
+                        }
+                        this.update();
+                    }
+                    this.html = function(){
+                        return '<span class="'+this.class()+'">'+this.val()+'</span>';
+                    }
+                    this.update = function(){
+                        $('.'+this.class()).html(this.val());
+                    }
+                    this.class = function(){
+                        return 'model_' + product.uid + '_' + name;
+                    }
+                    if (!product.attrs[name]){
+                        product.attrs[name] = {
+                            val: null,
+                            old: null
+                        }
+                    }
                     return this;
                 }(this, name);
                 
             }
-            this.span = function(attr){
-                
-            }
+            
+            this.uid = Math.floor(Math.random() * 10000000);
         }
     };
     
