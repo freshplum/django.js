@@ -267,6 +267,11 @@ $.django = function(method){
                     this.class = function(){
                         return 'model_' + obj.uid + '_' + name;
                     }
+                    this.follow = function(input){
+                        input.on('keyup', function(e){
+                            obj.attr(attr).val($(e.srcElement).val());
+                        });
+                    }
                     if (!obj.attrs) obj.attrs = {};
                     if (!obj.attrs[name]){
                         obj.attrs[name] = {
