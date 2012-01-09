@@ -7,7 +7,7 @@ $.django = function(method){
                 'no_match' : function(url){
                     window.location = url;
                 },
-                'active_views': []
+                'active': []
             }, options);
             $(window).data('django', settings);
             $(window).bind('popstate', function(){ $.django('statechange') });
@@ -46,12 +46,18 @@ $.django = function(method){
                     else{
                         var view = $(window).data('django').urls[i].view;
                         var requirements = $.django('requirements', view);
-                        var active = $.extend(true, [], $(window).data('django').active_views);
+                        var active = $.extend(true, [], $(window).data('django').active);
+                        
+                        // unload neccesary instances
                         for (var i=0; i<active.length; i++){
-                            if (requirements.indexOf(active[i]) == -1){
-                                $.django('unload', active[i]);
+                            for (var ii=0; ii<requirements.length; ii++){
+                                if (!(active[i] instanceof requirements[ii])){
+                                    $.django('unload', active[i]);
+                                }
                             }
                         }
+                        
+                        // load neccesary views
                         return $.django('load', view, match);
                     }
                 }
@@ -127,16 +133,15 @@ $.django = function(method){
             upon rendering
             */
             if (!view) return true;
-            if ($(window).data('django').active_views.indexOf(view) != -1) return true;
-
-            $(window).data('django').active_views.push(view);
+            if ($.django('isloaded', view)) return true;
+            
             var instance = new view();
             var deferred = $.Deferred();
-
             $.when($.django('load', instance.requires, match)).done(
                 function(view, match){
                     return function(){
                         var d = view.load.apply(view, match);
+                        $(window).data('django').active.push(view);
                         $.when(d).then(function(){
                             deferred.resolve();
                             if (view.title) document.title = view.title;
@@ -146,17 +151,25 @@ $.django = function(method){
                 }(instance, match));
             return deferred;
         },
-        unload: function(view){
+        unload: function(instance){
             /*
             (Optional) Called when a view is destroyed.
             */
-            if (!view) return true;
-            var index = $(window).data('django').active_views.indexOf(view);
-            $(window).data('django').active_views.splice(index, 1);
-
-            var instance = new view();
-            if (instance.unload) instance.unload.call('');
-            //var deferred = $.Deferred();
+            var active = $.extend(true, [], $(window).data('django').active);
+            for (var i in active){
+                if (active[i] == instance){
+                    $(window).data('django').active.splice(i, 1);
+                }
+            }
+            if (instance.unload) instance.unload.call(instance);
+            
+        },
+        isloaded: function(view){
+            var active = $.extend(true, [], $(window).data('django').active);
+            for (var i=0; i<active.length; i++){
+                if (active[i] instanceof view) return true;
+            }
+            return false;
         },
         requirements: function(view){
             /*
@@ -265,6 +278,17 @@ $.django = function(method){
                     return this.val();
                 }
                 return new f(this, name);
+                
+            },
+            this.revert = function(){
+                for (var name in this.attrs){
+                    this.attr(name).revert();
+                }
+            },
+            this.save = function(){
+                
+            },
+            this.update = function(){
                 
             }
         }
