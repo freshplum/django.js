@@ -223,24 +223,23 @@ $.django = function(method){
             })
         },
         model : function(options){
-            
-            this.attrs = {};
             this.attr = function(name){
-                return new function(product, attr){
+                var f = function(obj, attr){
                     this.save = function(){
-                        product.attrs[attr].old = product.attrs[attr].val;
+                        obj.attrs[attr].old = obj.attrs[attr].val;
                     }
                     this.revert = function(){
-                        product.attrs[attr].val = product.attrs[attr].old;
+                        obj.attrs[attr].val = obj.attrs[attr].old;
+                        this.update();
                     }
                     this.val = function(value){
-                        if (value === undefined) return product.attrs[attr].val;
-                        if (!product.attrs[attr].val){
-                            product.attrs[attr].val = value;
-                            product.attrs[attr].old = value;
+                        if (value === undefined) return obj.attrs[attr].val;
+                        if (!obj.attrs[attr].val){
+                            obj.attrs[attr].val = value;
+                            obj.attrs[attr].old = value;
                         }
                         else{
-                            product.attrs[attr].val = value;
+                            obj.attrs[attr].val = value;
                         }
                         this.update();
                     }
@@ -251,20 +250,23 @@ $.django = function(method){
                         $('.'+this.class()).html(this.val());
                     }
                     this.class = function(){
-                        return 'model_' + product.uid + '_' + name;
+                        return 'model_' + obj.uid + '_' + name;
                     }
-                    if (!product.attrs[name]){
-                        product.attrs[name] = {
+                    if (!obj.attrs) obj.attrs = {};
+                    if (!obj.attrs[name]){
+                        obj.attrs[name] = {
                             val: null,
                             old: null
                         }
                     }
                     return this;
-                }(this, name);
+                }
+                f.prototype.toString = function(){
+                    return this.val();
+                }
+                return new f(this, name);
                 
             }
-            
-            this.uid = Math.floor(Math.random() * 10000000);
         }
     };
     
