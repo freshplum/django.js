@@ -293,10 +293,14 @@ $.django = function(method){
                 }
             },
             this.save = function(){
-                
+                for (var name in this.attrs){
+                    this.attr(name).save();
+                }
             },
             this.update = function(){
-                
+                for (var name in this.attrs){
+                    this.attr(name).update();
+                }
             }
         }
     };
