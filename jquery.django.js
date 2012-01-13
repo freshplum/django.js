@@ -10,14 +10,16 @@ $.django = function(method){
                 'active': []
             }, options);
             $(window).data('django', settings);
-            $(window).bind('popstate', function(){ $.django('statechange') });
+            $(window).bind('popstate', function(){ $.django('statechange', true) });
             $.django('anchors');
             
             /* TODO -- some browsers fire the popstate event immediately upon page load,
             meaning that inital view will be loaded twice since there are 2 calls to
             $.django('statechange')
             */ 
-            //$.django('statechange');
+            if (!$(window).data('django').listener_fired){
+                $.django('statechange');
+            }
             return this;
         },
         pushstate : function(obj, title, url){
@@ -29,10 +31,11 @@ $.django = function(method){
             $.django('statechange');
             return this;
         },
-        statechange : function() {
+        statechange : function(from_listener) {
             /*
             Called when the url is changed and a new view should be called
             */
+            if (from_listener) $(window).data('django').listener_fired = true;
             if (!$(window).data('django').urls) return $.error('No URLS defined!');
 
             var url = $.django('url');
