@@ -134,26 +134,26 @@ $.django = function(method){
                 }
             }
 
-            Also, by setting the 'title' attribute of a view object, the pages title will be updated
+            Also, by setting the 'title' attribute of a view object, the window's title will be updated
             upon rendering
             */
             if (!view) return true;
             if ($.django('isloaded', view)) return true;
-            
             var instance = new view();
+            
             var deferred = $.Deferred();
             $.when($.django('load', instance.requires, match)).done(
-                function(view, match){
+                function(view, match, deferred){
                     return function(){
                         var d = view.load.apply(view, match);
                         $(window).data('django').active.push(view);
-                        $.when(d).then(function(){
+                        $.when(d).done(function(){
                             deferred.resolve();
                             if (view.title) document.title = view.title;
                             return $.django('anchors');
                         });
                     }
-                }(instance, match));
+                }(instance, match, deferred));
             return deferred;
         },
         unload: function(instance){
