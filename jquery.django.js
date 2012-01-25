@@ -10,16 +10,17 @@ $.django = function(method){
                 'active': []
             }, options);
             $(window).data('django', settings);
-            $(window).bind('popstate', function(){ $.django('statechange', true) });
+            $(window).bind('popstate', function(){ $.django('statechange') });
             $.django('anchors');
             
             /* TODO -- some browsers fire the popstate event immediately upon page load,
             meaning that inital view will be loaded twice since there are 2 calls to
             $.django('statechange')
-            */ 
-            if (!$(window).data('django').listener_fired){
-                $.django('statechange');
-            }
+            */
+            $(window).data('django').was_popped = ('state' in window.history);
+            $(window).data('django').initial = location.href;
+           
+            $.django('statechange', false);
             return this;
         },
         pushstate : function(obj, title, url){
@@ -31,11 +32,14 @@ $.django = function(method){
             $.django('statechange');
             return this;
         },
-        statechange : function(from_listener) {
+        statechange : function() {
             /*
             Called when the url is changed and a new view should be called
             */
-            if (from_listener) $(window).data('django').listener_fired = true;
+            var initialPop = !$(window).data('django').popped && location.href == $(window).data('django').initial;
+            $(window).data('django').popped = true;
+            if (initialPop) return false;
+
             if (!$(window).data('django').urls) return $.error('No URLS defined!');
 
             var url = $.django('url');
@@ -140,21 +144,21 @@ $.django = function(method){
             if (!view) return true;
             if ($.django('isloaded', view)) return true;
             var instance = new view();
-            
-            var deferred = $.Deferred();
-            $.when($.django('load', instance.requires, match)).done(
-                function(view, match, deferred){
-                    return function(){
-                        var d = view.load.apply(view, match);
-                        $(window).data('django').active.push(view);
-                        $.when(d).done(function(){
-                            deferred.resolve();
-                            if (view.title) document.title = view.title;
-                            return $.django('anchors');
-                        });
-                    }
-                }(instance, match, deferred));
-            return deferred;
+            return function(defer){
+                $.when($.django('load', instance.requires, match)).done(
+                    function(view, match){
+                        return function(){
+                            var d = view.load.apply(view, match);
+                            $(window).data('django').active.push(view);
+                            $.when(d).done(function(){
+                                defer.resolve();
+                                if (view.title) document.title = view.title;
+                                return $.django('anchors');
+                            });
+                        }
+                    }(instance, match));
+                return defer;
+            }($.Deferred());
         },
         unload: function(instance){
             /*
