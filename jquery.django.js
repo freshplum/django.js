@@ -1,7 +1,7 @@
-(function($) { 
+(function($) {
 $.django = function(method){
     var methods = {
-        init : function(options) { 
+        init : function(options) {
             var settings = $.extend({
                 'urls' : [],
                 'no_match' : function(url){
@@ -12,14 +12,14 @@ $.django = function(method){
             $(window).data('django', settings);
             $(window).bind('popstate', function(){ $.django('statechange') });
             $.django('anchors');
-            
+
             /* TODO -- some browsers fire the popstate event immediately upon page load,
             meaning that inital view will be loaded twice since there are 2 calls to
             $.django('statechange')
             */
             $(window).data('django').was_popped = ('state' in window.history);
             $(window).data('django').initial = location.href;
-           
+
             $.django('statechange', false);
             return this;
         },
@@ -36,9 +36,9 @@ $.django = function(method){
             /*
             Called when the url is changed and a new view should be called
             */
-            var initialPop = !$(window).data('django').popped && location.href == $(window).data('django').initial;
-            $(window).data('django').popped = true;
-            if (initialPop) return false;
+            //var initialPop = !$(window).data('django').popped && location.href == $(window).data('django').initial;
+            //$(window).data('django').popped = true;
+            //if (initialPop) return false;
 
             if (!$(window).data('django').urls) return $.error('No URLS defined!');
 
@@ -54,7 +54,7 @@ $.django = function(method){
                         var view = $(window).data('django').urls[i].view;
                         var requirements = $.django('requirements', view);
                         var active = $.extend(true, [], $(window).data('django').active);
-                        
+
                         // unload neccesary instances
                         for (var i=0; i<active.length; i++){
                             var remove = true;
@@ -65,7 +65,7 @@ $.django = function(method){
                             }
                             if (remove) $.django('unload', active[i]);
                         }
-                        
+
                         // load neccesary views
                         return $.django('load', view, match);
                     }
@@ -73,7 +73,7 @@ $.django = function(method){
             }
             return $(window).data('django').no_match(url);
         },
-        anchors : function() { 
+        anchors : function() {
             /*
             Hijack all the the pages anchors and attach a event handler
             that updates the page's location via a pushState change instead of
@@ -91,37 +91,37 @@ $.django = function(method){
                 return false;
             });
         },
-        load : function(view, match) { 
+        load : function(view, match) {
             /*
             Does the work for loading a new view
 
-            For each view, it is the author of a view's responsibility to impliment 
-            a method called 'load'. Into the load method are passed the 
+            For each view, it is the author of a view's responsibility to impliment
+            a method called 'load'. Into the load method are passed the
             parameters that came from the regular expression match
             of the page's URL.
 
-            e.g. Let's say that your URL pattern has the 
-            form /article/50/ where "50" in this case represents an variable ID 
+            e.g. Let's say that your URL pattern has the
+            form /article/50/ where "50" in this case represents an variable ID
             that your view would require.
 
-            The regex for this url may look like: 
-                /\/article\/(.[^\/]*)\/?/ 
+            The regex for this url may look like:
+                /\/article\/(.[^\/]*)\/?/
 
-            And the view would look like: 
+            And the view would look like:
                 function myView(){
                     this.render = function(url, article_id){
                         // do something
                     }
                 }
 
-            If a view is a "subview", and thus requires that another view be loaded 
-            before it is called, simply set the 'requires' attribute of the object to 
-            the view that needs to be loaded first. Note, this will render the required 
-            view first, and in a synchronous manner, before loading the current view. In order 
-            to accomplish this (and if synchronicity is important to you), ensure that 
-            the return from the load method returns a deferred (new in jquery 1.5) that will 
-            resolve when the next view is ready to be loaded. 
-            
+            If a view is a "subview", and thus requires that another view be loaded
+            before it is called, simply set the 'requires' attribute of the object to
+            the view that needs to be loaded first. Note, this will render the required
+            view first, and in a synchronous manner, before loading the current view. In order
+            to accomplish this (and if synchronicity is important to you), ensure that
+            the return from the load method returns a deferred (new in jquery 1.5) that will
+            resolve when the next view is ready to be loaded.
+
             Good article on deferreds: http://www.erichynds.com/jquery/using-deferreds-in-jquery/
 
             e.g.
@@ -171,7 +171,7 @@ $.django = function(method){
                 }
             }
             if (instance.unload) instance.unload.call(instance);
-            
+
         },
         isloaded: function(view){
             var active = $.extend(true, [], $(window).data('django').active);
@@ -184,7 +184,7 @@ $.django = function(method){
             /*
             Recusively iterates thru a view's list of required subviews and returns
             a list of each required view (plus itself).
-            
+
             This is used for determining what views to unload upon a new statechange -- you
             probably won't ever need to call this method externally
             */
@@ -195,7 +195,7 @@ $.django = function(method){
         url : function(name, params){
             /*
             Return the url, as a string, for a view given the view's 'name' attribute.
-            */ 
+            */
             if (!name) return window.location.pathname;
             for (var i in $(window).data('django').urls){
                 if ($(window).data('django').urls[i].name == name){
@@ -203,7 +203,7 @@ $.django = function(method){
                 }
             }
         },
-        reverse : function(regex, params) { 
+        reverse : function(regex, params) {
             /*
             Super bootleg -- I can't find another better method though. Please help.
             */
@@ -221,7 +221,7 @@ $.django = function(method){
             }
             return s;
         },
-        toggle : function(x) { 
+        toggle : function(x) {
             /*
             Useful function for toggling state between a group of HTML elements
             Common example is changing the class of a link when it is "active"
@@ -229,7 +229,7 @@ $.django = function(method){
             @input
             x.group -- jquery selection of elements e.g. $('#nav li')
 
-            x.select -- function called on each element from x.group and returns 
+            x.select -- function called on each element from x.group and returns
                         true/false to signify whether or not the element is "active"
                         e.g. function(){ return this.html() == 'Home' }
 
@@ -292,7 +292,7 @@ $.django = function(method){
                     return this.val();
                 }
                 return new f(this, name);
-                
+
             },
             this.revert = function(){
                 for (var name in this.attrs){
@@ -308,7 +308,7 @@ $.django = function(method){
                 for (var name in this.attrs){
                     this.attr(name).save();
                 }
-                
+
             },
             this.update = function(){
                 for (var name in this.attrs){
@@ -317,14 +317,14 @@ $.django = function(method){
             }
         }
     };
-    
+
     // Method calling logic
     if (methods[method]){
         return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
-    } 
+    }
     else if (typeof method === 'object' || ! method){
         return methods.init.apply( this, arguments );
-    } 
+    }
     else {
         $.error( 'Method ' + method + ' does not exist on jQuery.django' );
     }
