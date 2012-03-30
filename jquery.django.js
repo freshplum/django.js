@@ -276,6 +276,7 @@ $.django = function(method){
                     }
                     this.follow = function(input){
                         input.on('keyup', function(e){
+                            if (e.keyCode == 27) return;
                             obj.attr(attr).val($(e.srcElement).val());
                         });
                     }
