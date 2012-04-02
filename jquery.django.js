@@ -90,6 +90,7 @@ $.django = function(method){
                 }
                 return false;
             });
+            if ($(window).data('django').anchor_callback) $(window).data('django').anchor_callback.call();
         },
         load : function(view, match) {
             /*
