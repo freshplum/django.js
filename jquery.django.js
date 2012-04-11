@@ -143,7 +143,10 @@ $.django = function(method){
             upon rendering
             */
             if (!view) return true;
-            if ($.django('isloaded', view)) return true;
+            if ($.django('isloaded', view)){
+                $.django('reload', view);
+                return true;
+            }
             var instance = new view();
             return function(defer){
                 $.when($.django('load', instance.requires, match)).done(
@@ -173,6 +176,17 @@ $.django = function(method){
             }
             if (instance.unload) instance.unload.call(instance);
 
+        },
+        reload: function(view){
+            /*
+            (Optional) Called when a loaded again
+            */
+            var active = $.extend(true, [], $(window).data('django').active);
+            for (var i=0; i<active.length; i++){
+                if (active[i] instanceof view){
+                    if (active[i].reload) active[i].reload.call(active[i]);
+                }
+            }
         },
         isloaded: function(view){
             var active = $.extend(true, [], $(window).data('django').active);
