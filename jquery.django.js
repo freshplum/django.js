@@ -144,7 +144,7 @@ $.django = function(method){
             */
             if (!view) return true;
             if ($.django('isloaded', view)){
-                $.django('reload', view);
+                $.django('reload', view, match);
                 return true;
             }
             var instance = new view();
@@ -177,14 +177,14 @@ $.django = function(method){
             if (instance.unload) instance.unload.call(instance);
 
         },
-        reload: function(view){
+        reload: function(view, match){
             /*
             (Optional) Called when a loaded again
             */
             var active = $.extend(true, [], $(window).data('django').active);
             for (var i=0; i<active.length; i++){
                 if (active[i] instanceof view){
-                    if (active[i].reload) active[i].reload.call(active[i]);
+                    if (active[i].reload) active[i].reload.apply(active[i], match);
                 }
             }
         },
