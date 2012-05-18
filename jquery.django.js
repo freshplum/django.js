@@ -29,10 +29,10 @@ $.django = function(method){
             pushState yet
             */
             window.history.pushState(obj, title, url);
-            $.django('statechange');
+            $.django('statechange', obj);
             return this;
         },
-        statechange : function() {
+        statechange : function(obj){
             /*
             Called when the url is changed and a new view should be called
             */
@@ -71,7 +71,7 @@ $.django = function(method){
                     }
                 }
             }
-            return $(window).data('django').no_match(url);
+            return $(window).data('django').no_match.call(obj, url);
         },
         anchors : function() {
             /*
@@ -84,6 +84,7 @@ $.django = function(method){
             */
             $('a').off('click.django');
             $('a').on('click.django', function(){
+                if ($(this).attr('TARGET')) return true;
                 if ($(this).attr('href') && $(this).attr('href') != '#'){
                     try{ $.django('pushstate', {}, '', $(this).attr('href')); }
                     catch (e){ $.error(e) }
