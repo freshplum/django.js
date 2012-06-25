@@ -2,6 +2,8 @@
 $.django = function(method){
     var methods = {
         init : function(options) {
+	    var popped, initialUrl; // for popstate event listener
+	    
             var settings = $.extend({
                 'urls' : [],
                 'no_match' : function(url){
@@ -10,7 +12,20 @@ $.django = function(method){
                 'active': []
             }, options);
             $(window).data('django', settings);
-            $(window).bind('popstate', function(){ $.django('statechange') });
+	    
+            // need to handle the incorrect event fired by some browsers:
+            popped = false;
+            initialURL = location.href
+            $(window).bind('popstate', function(){ 
+                var initialPop = (!popped && location.href === initialURL);
+                popped = true;
+                if ( initialPop ) {
+                    return;
+                }
+                $.django('statechange') 
+            });
+
+            
             $.django('anchors');
 
             /* TODO -- some browsers fire the popstate event immediately upon page load,
@@ -86,12 +101,20 @@ $.django = function(method){
             $('a').on('click.django', function(){
                 if ($(this).attr('TARGET')) return true;
                 if ($(this).attr('href') && $(this).attr('href') != '#'){
-                    try{ $.django('pushstate', {}, '', $(this).attr('href')); }
-                    catch (e){ $.error(e) }
+                    try{ 
+			$.django('pushstate', {}, '', $(this).attr('href')); 
+		    } catch (e) { 
+			$.error(e) ;
+		    }
                 }
+
+		// 6/25/12: this block used to be below the handler definition
+		if ($(window).data('django').anchor_callback) {
+		    $(window).data('django').anchor_callback.call();
+		}
+		
                 return false;
             });
-            if ($(window).data('django').anchor_callback) $(window).data('django').anchor_callback.call();
         },
         load : function(view, match) {
             /*
