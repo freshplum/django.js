@@ -14,7 +14,7 @@ $.django = function(method){
             $(window).data('django', settings);
             
             // need to handle the incorrect event fired by some browsers:
-            popped = false;
+            popped =  ('state' in window.history);
             initialURL = location.href
             $(window).bind('popstate', function(){ 
                 var initialPop = (!popped && location.href === initialURL);
@@ -108,7 +108,6 @@ $.django = function(method){
                     }
                 }
 
-                // 6/25/12: this block used to be below the handler definition
                 if ($(window).data('django').anchor_callback) {
                     $(window).data('django').anchor_callback.call();
                 }
