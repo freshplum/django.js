@@ -99,8 +99,11 @@ $.django = function(method){
             */
             $('a').off('click.django');
             $('a').on('click.django', function(){
+                l($(this));
+                var hijack = false;
                 if ($(this).attr('TARGET')) return true;
                 if ($(this).attr('href') && $(this).attr('href') != '#'){
+                    hijack = true;
                     try{
                         $.django('pushstate', {}, '', $(this).attr('href'));
                     }
@@ -108,14 +111,12 @@ $.django = function(method){
                         $.error(e) ;
                     }
                 }
-                else return true;
 
-                if ($(window).data('django').anchor_callback) {
-                    $(window).data('django').anchor_callback.call();
-                }
-
-                return false;
+                return (!hijack);
             });
+            if ($(window).data('django').anchor_callback) {
+                $(window).data('django').anchor_callback.call();
+            }
         },
         load : function(view, match) {
             /*
