@@ -3,7 +3,7 @@ $.django = function(method){
     var methods = {
         init : function(options) {
             var popped, initialUrl; // for popstate event listener
-            
+
             var settings = $.extend({
                 'urls' : [],
                 'no_match' : function(url){
@@ -12,20 +12,20 @@ $.django = function(method){
                 'active': []
             }, options);
             $(window).data('django', settings);
-            
+
             // need to handle the incorrect event fired by some browsers:
             popped =  ('state' in window.history);
             initialURL = location.href
-            $(window).bind('popstate', function(){ 
+            $(window).bind('popstate', function(){
                 var initialPop = (!popped && location.href === initialURL);
                 popped = true;
                 if ( initialPop ) {
                     return;
                 }
-                $.django('statechange') 
+                $.django('statechange')
             });
 
-            
+
             $.django('anchors');
 
             /* TODO -- some browsers fire the popstate event immediately upon page load,
@@ -101,17 +101,19 @@ $.django = function(method){
             $('a').on('click.django', function(){
                 if ($(this).attr('TARGET')) return true;
                 if ($(this).attr('href') && $(this).attr('href') != '#'){
-                    try{ 
-                        $.django('pushstate', {}, '', $(this).attr('href')); 
-                    } catch (e) { 
+                    try{
+                        $.django('pushstate', {}, '', $(this).attr('href'));
+                    }
+                    catch (e) {
                         $.error(e) ;
                     }
                 }
+                else return true;
 
                 if ($(window).data('django').anchor_callback) {
                     $(window).data('django').anchor_callback.call();
                 }
-                
+
                 return false;
             });
         },
