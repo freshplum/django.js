@@ -16,7 +16,6 @@ $.django = function(method){
             // need to handle the incorrect event fired by some browsers:
             popped =  ('state' in window.history);
             initialURL = location.href
-
             $(window).bind('popstate', function(){
                 var initialPop = (popped && location.href === initialURL);
                 popped = false;
@@ -100,21 +99,22 @@ $.django = function(method){
             */
             $('a').off('click.django');
             $('a').on('click.django', function(){
+                var hijack = false;
                 if ($(this).attr('TARGET')) return true;
                 if ($(this).attr('href') && $(this).attr('href') != '#'){
+                    hijack = true;
                     try{
                         $.django('pushstate', {}, '', $(this).attr('href'));
-                    } catch (e) {
+                    }
+                    catch (e) {
                         $.error(e) ;
                     }
                 }
-
-                if ($(window).data('django').anchor_callback) {
-                    $(window).data('django').anchor_callback.call();
-                }
-
-                return false;
+                return (!hijack);
             });
+            if ($(window).data('django').anchor_callback) {
+                $(window).data('django').anchor_callback.call();
+            }
         },
         load : function(view, match) {
             /*
