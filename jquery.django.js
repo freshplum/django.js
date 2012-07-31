@@ -99,9 +99,13 @@ $.django = function(method){
             */
             $('a').off('click.django');
             $('a').on('click.django', function(){
+                var bad_prefixes = ['#', 'javascript:'];
                 var hijack = false;
                 if ($(this).attr('TARGET')) return true;
-                if ($(this).attr('href') && $(this).attr('href') != '#'){
+                if ($(this).attr('href')){
+                    for (var i=0;i<bad_prefixes.length;i++){
+                        if ($(this).attr('href').indexOf(bad_prefixes[i]) == 0) return false;
+                    }
                     hijack = true;
                     try{
                         $.django('pushstate', {}, '', $(this).attr('href'));
