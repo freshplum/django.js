@@ -17,8 +17,8 @@ $.django = function(method){
             popped =  ('state' in window.history);
             initialURL = location.href
             $(window).bind('popstate', function(){
-                var initialPop = (!popped && location.href === initialURL);
-                popped = true;
+                var initialPop = (popped && location.href === initialURL);
+                popped = false;
                 if ( initialPop ) {
                     return;
                 }
