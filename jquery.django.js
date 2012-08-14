@@ -104,7 +104,7 @@ $.django = function(method){
                 if ($(this).attr('TARGET')) return true;
                 if ($(this).attr('href')){
                     for (var i=0;i<bad_prefixes.length;i++){
-                        if ($(this).attr('href').indexOf(bad_prefixes[i]) == 0) return false;
+                        if ($(this).attr('href').indexOf(bad_prefixes[i]) == 0) return true;
                     }
                     hijack = true;
                     try{
